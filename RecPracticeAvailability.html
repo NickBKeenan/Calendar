@@ -1,0 +1,289 @@
+<head>
+    <title>DC Soccer Practice Field Availability</title>
+    <link rel='SHORTCUT ICON' href='favicon.ico' type='image/x-icon' />
+
+</head>
+<div>
+ <style>
+
+  #fieldlist
+{
+font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+width:100%;
+//border-collapse:collapse;
+}
+#fieldlist table
+{
+  width:1900px;
+}
+#fieldlist td, #fieldlist th 
+{
+font-size:1em;
+border:1px solid black;
+padding:3px 7px 2px 7px;
+}
+#fieldlist th 
+{
+font-size:1.1em;
+text-align:left;
+padding-top:5px;
+padding-bottom:4px;
+background-color:#A7C942;
+color:#ffffff;
+}
+#fieldlist td
+{
+
+color:black;
+}
+#fieldlist  td.free 
+{
+
+background-color:green;
+}
+#fieldlist td.unavailable 
+{
+
+background-color:gray;
+}
+#fieldlist  td.overbooked
+{
+
+background-color:red;
+}
+#fieldlist  td.full
+{
+
+background-color:white;
+}
+#fieldlist  td.partial 
+{
+
+background-color:yellow;
+}
+
+#fieldlist  td.fieldlabel
+{
+
+background-color:white;
+}
+
+#fieldlist  td.slottime 
+{
+
+background-color:white;
+}
+
+h1, h2, h3
+{font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+ font-weight: normal;
+}
+
+</style>
+
+</div>
+
+<div>
+    <img src="DCSoccer.png" height="120" />
+    <h1>DC Soccer Recreational Practice Field Availability</h1>
+
+    <h1 hidden>
+        Coming soon. Field avilability is not quite ready yet.
+    </h1>
+    <H2>
+        Field Availability changes <i>frequently</i> in the run-up to the season.
+        <p>Fields often become available after the start of sign-up.
+        <p>If you are interested in a particular field or time and it's not listed right now, check back on this page regularly for changes.
+        <p>
+            <h2 hidden>
+                A note about daylight for the fall season: The sun will set at 7:30 on September 23, 7PM on October 13, 6:30 on October 31, and 5:30 on November 6. <p>
+                    While we have practice slots that start as late as 7PM, slots starting after 5:30 will lose significant time to darkness. Fields with lights are Jelleff, Wilson and Parkview.
+            </h2>
+    </H2>
+    <label id="SeasonDates"></label>
+    <div id="Wheel">
+        <img src="ajax-loader.gif">
+    </div>
+    <label id="label1">Initializing...</label>
+
+    <table ID="fieldlist">
+    </table>
+
+    <div>
+        <script>
+            var g_Season = "";
+            var g_User = "";
+            function Season() {
+                var queryString = window.location.search;
+                queryString = queryString.toUpperCase();
+                var urlParams = new URLSearchParams(queryString);
+                g_Season = urlParams.get("SEASON");
+                g_User = urlParams.get("USER");
+                return g_Season;
+
+            }
+
+
+            class GoogleApi {
+                Constructor() {
+                }
+
+                getCalendarArray(Season) {
+                    var params = [];
+                    params.CallBack = "onSuccess";
+                    params.OnFail = "FailHandler";
+                    params.Action = "getCalendarArray";
+                    params.Season = Season;
+
+                    this.GetGoogleData(params);
+                };
+
+
+
+
+                GetGoogleData(params) {
+
+                    var script = document.createElement("script");
+                    // This script has a callback function that will run when the script has
+                    // finished loading.
+		// this comes from the script named "Rec Practice Availability"
+// URL is https://script.google.com/home/projects/18m6CbkUg6Q6pLkuf3CNQsITAw_7zif9ZwOXTyHv7vcAH2r0RsuYdhTxU/edit
+
+                    var key = "AKfycbwp7UEEoBLJlKD2BbzV6xUbqQqYncq2o4NTHsNerJpZUYnkLA68ViEOctzzx7dgqqfQQQ";
+                    script.src = "https://script.google.com/macros/s/" + key + "/exec";
+
+
+                    var paramstr = "";
+                    for (var name in params) {
+                        if (paramstr.length > 0) {
+                            paramstr += "&";
+                        }
+                        paramstr += name + "=" + encodeURIComponent(params[name]);
+                    }
+                    if (paramstr.length > 0) {
+                        script.src += "?" + paramstr;
+                    }
+
+                    console.log(script.src);
+                    script.type = "text/javascript";
+                    document.getElementsByTagName("head")[0].appendChild(script);
+
+
+                }
+
+            }
+
+            var googleApi = new GoogleApi();
+
+
+            googleApi.getCalendarArray(Season());
+
+
+            function onSuccess(v) {
+
+                //v is an array with the following fields:
+                //Name
+                //DOW
+                // Time
+                // Address
+                var wheel = document.getElementById("Wheel");
+                wheel.style.display = "none";
+                var label = document.getElementById("label1");
+
+                label.innerHTML = "<h3>Click on a field name to view field on a map.</h3>";
+
+                var table = document.getElementById("fieldlist");
+
+
+                while (table.rows.length > 0) {
+                    table.deleteRow(0);
+                }
+
+                if (v.length == 0) {
+                    var row, cell;
+                    row = table.insertRow(-1);
+                    cell = row.insertCell(0);
+                    cell.innerHTML = "Field Availablity hasn't been set yet.";;
+                    return;
+                }
+
+
+                var i;
+                var lastfield = " ";
+                var lastday = " ";
+                var fieldstr = '';
+                var row, cell;
+                SetSeasonDates(v[v.length - 1]);
+
+                for (i = 0; i < v.length - 1; i++) {
+
+                    if (lastfield == v[i][0] && lastday == v[i][1]) {
+                        fieldstr += " " + v[i][2];
+                    }
+                    else {
+
+                        if (i > 0) {
+                            cell = row.insertCell(-1);
+                            cell.innerHTML = fieldstr;
+                            cell.class = "slotttime";
+
+                        }
+
+
+                        row = table.insertRow(-1);
+                        cell = row.insertCell(-1);
+
+                        if (lastfield != v[i][0]) {
+                            cell.innerHTML = '<a href="http://maps.google.com/?q=' + v[i][3] + '" target="_blank">' + v[i][0] + '</a>';
+
+                        }
+                        cell = row.insertCell(-1);
+                        cell.innerHTML = v[i][1];
+                        cell.class = "slottime";
+
+                        lastfield = v[i][0];
+                        lastday = v[i][1];
+                        fieldstr = v[i][2];
+
+                    }
+
+                }
+                cell = row.insertCell(-1);
+                cell.innerHTML = fieldstr;
+                cell.class = "slotttime";
+
+
+
+
+
+            }
+
+            function SetSeasonDates(data) {
+
+                var label = document.getElementById("SeasonDates");
+
+                label.innerHTML = "<h3>Season Dates are " + DtoC(data[0]) + " to " + DtoC(data[1]) + "</h3>";
+
+
+            }
+
+
+            function DtoC(date) {
+                var indate = new Date(date);
+
+                var retval = (indate.getMonth() + 1) + '/' + indate.getDate() + '/' + indate.getFullYear();
+                return retval;
+            }
+
+            /*********************************************************************************************************/
+            function FailHandler(e) {
+                alert("The called function failed");
+                alert(e.message);
+            }
+
+        </script>
+
+    </div>
+
+
+</div>

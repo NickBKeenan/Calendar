@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="https://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="Assignments.css">
+
+
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.js"></script>
+
+
+    <title></title>
+    <link rel='SHORTCUT ICON' href='favicon.ico' type='image/x-icon' />
+
+</head>
+<body onload="LoadPages()">
+    <script src="data.js"></script>
+    <script src="editrow.js"></script>
+    <script src="dataStructures.js"></script>
+    <script src="FieldsDisplay.js"></script>
+    <script src="GoogleApi.js"></script>
+    <script src="divisions.js"></script>
+    <script src="SeasonsDisplay.js"></script>
+    <script src="Assignments.js"></script>
+    <!-- Tab links -->
+
+    <h2>DC Soccer Field Assignments <span id="SeasonName"></span></h2>
+
+    <p></p>
+
+    <div class="tab">
+        <button id="defaultOpen" class="tablinks" onclick="openTab(event, 'Availability')">Fields</button>
+        <button class="tablinks" onclick="openTab(event, 'Summary')">Divisions</button>
+        <button class="tablinks" onclick="openTab(event, 'ReleaseTab')">Release</button>
+        <button class="tablinks" onclick="openTab(event, 'PublishTab')">Publish</button>
+        <button class="tablinks" onclick="openTab(event, 'SeasonsTab')">Seasons</button>
+
+        <button class="tablinks" onclick="openTab(event, 'Settings')">Settings</button>
+        <button class="tablinks" onclick="openTab(event, 'Reports')">Reports</button>
+        <button id="errorOpen" class="tablinks" onclick="openTab(event, 'Errors')">Errors</button>
+        <button class="tablinks" onclick="openTab(event, 'Documentation')">Help</button>
+        <span id="StatusBar" style="float: right"></span>
+    </div>
+
+    <div id="Availability" class="tabcontent">
+        <button onclick="CreateNewPermit()">Add New Permit</button> <button onclick="CreateNewAssignment()">Add New Assignment</button>
+        <table border="1" id="fieldlist" class="calendar"></table>
+    </div>
+
+    <div id="Summary" class="tabcontent">
+        <button onclick="CreateNewPermit()">Add New Permit</button> <button onclick="CreateNewAssignment('Rec Games')">Add New Rec Games</button>
+        <a href="https://docs.google.com/spreadsheets/d/1ANYooJQKL5Vd5nusl9w1tD2ase7UkDKdSw_OevD4EmU/edit#gid=1" target="_blank">Source Spreadsheet</a>
+        <table id="divlist" class="xtable"></table>
+    </div>
+
+    <div id="PublishTab" class="tabcontent">
+        <h3>Publish schedules to Blue Sombrero</h3>
+        <table id="PublishTable" class="xtable"></table>
+
+    </div>
+    <div id="SeasonsTab" class="tabcontent">
+        <h3>Seasons</h3>
+        <button onclick="CreateNewSeason()">Create New Season</button>
+        <a href="https://docs.google.com/spreadsheets/d/1ANYooJQKL5Vd5nusl9w1tD2ase7UkDKdSw_OevD4EmU/edit#gid=0" target="_blank" style="float: right">Open Seasons Spreadsheet</a>
+        <p></p>
+        <table id="SeasonsTable" class="xtable"></table>
+
+    </div>
+    <div id="ReleaseTab" class="tabcontent">
+        <h3>Release Field Assignments to Commissioners</h3>
+        This will populate the Slots tab in the Scheduler worksheet.<p></p>
+        <button onclick="PopulateAllSlots(0)">Release Fields to All Divisions</button>&nbsp;
+        <button onclick="PopulateAllTeams()">Load Teams Tab for All Divisions</button><p></p>
+        Before loading teams tab, run the "Team Detail" report in Blue Sombrero and paste the output into the "Team Names" tab of <a href="https://docs.google.com/spreadsheets/d/1dSkEgw4gfg2GyUmmkQE_DKP-zF3MPfIVKVgWQycjvIo/edit#gid=0" target="_blank">this spreadsheet</a>. Divisions will be
+        populated by 3-letter prefix so make sure all team names have the proper prefix.
+        <table id="ReleaseTable" class="xtable"></table>
+        <p></p>
+    </div>
+
+    <div id="Documentation" class="tabcontent">
+        <h3>Instructions for doing field assignments</h3>
+        <p><a href="https://sites.google.com/site/stoddertcalendar/scheduler-instructions" target="_blank">Scheduler Instructions</a></p>
+        <p><a href="https://docs.google.com/document/d/1wrSR8EHnYyQw3OzPrUJGK683BNTyrEEdGSGIBx9vius/edit" target="_blank">Master Fields Calendar Instructions</a></p>
+        <p><a href="https://docs.google.com/document/d/14WtIXi9zvPpw-SIyAseZekKPklRQfmKM38wSol4OG7Y/edit" target="_blank">Upload to Blue Sombrero Instructions</a></p>
+    </div>
+    <div id="Settings" class="tabcontent">
+        <h3>Fields Calendar settings</h3>
+        <p>Not sure what goes here but it seemed appropriate.</p>
+        <button onclick="InitiateUpdateCheck()">Force Update</button> <button onclick="CheckForUpdatedFile()">Check for Updates Now</button>
+
+    </div>
+    <div id="Reports" class="tabcontent">
+        <h3>Reports</h3>
+        <p><a href="RecPracticeAvailability.html" target="_blank">Rec Practice Availability</p>
+        <p><a href="RecPracticeSignup.html" target="_blank">Rec Practice Signup</p>
+        <p><a href="unusedGameSlots.html" target="_blank"> Unused Rec Game Slots</a></p>
+
+
+    </div>
+
+    <div id="Errors" class="tabcontent">
+        <h3>Errors encountered loading calendar</h3>
+        <table id="errorlist"></table>
+    </div>
+
+
+
+    <p>
+    </p>
+
+    <div id="EditRow" class="ModalDialog">
+        <span id="closeit" class="close">&times;</span>
+
+        <form id="Form">
+            <div id="MainForm" class="modal-content">
+                <fieldset>
+                    <legend>Location</legend>
+
+
+                    <select id="Field" onchange="ChangeSlotCount(this)"> </select>
+                </fieldset>
+                <fieldset>
+                    <legend>Time</legend>
+
+                    <input type="time" id="BeginTime" style="font-size:large"> to
+                    <input type="time" id="EndTime" style="font-size:large">
+                </fieldset>
+                <fieldset>
+                    <legend>Dates</legend>
+                    <input type="radio" name="requesttype" id="Weekly" onclick="ChangeRequestType(this);">
+                    <label id="WeeklyLabel" for="Weekly">Weekly </label>
+
+                    <input type="radio" name="requesttype" id="OneTime" onclick="ChangeRequestType(this);">
+                    <label for="OneTime">One-time </label>
+                    <p>
+                        <span id="WeeklyDiv">
+                            <input type="text" id="BeginDate">  to  <input type="text" id="EndDate">
+                            <input type="checkbox" name="GamesOnly" id="GamesOnly" onclick="SetExceptions()">Game weeks only
+                            <br>
+
+
+                            <input type="checkbox" name="Days" id="Saturday" onclick="SetExceptions()"><label for="Saturday">Saturdays</label>
+                            <input type="checkbox" name="Days" id="Sunday" onclick="SetExceptions()"><label for="Sunday">Sundays</label>
+                            <input type="checkbox" name="Days" id="Monday" onclick="SetExceptions()"><label for="Monday">Mondays</label>
+                            <input type="checkbox" name="Days" id="Tuesday" onclick="SetExceptions()"><label for="Tuesday">Tuesdays</label>
+                            <input type="checkbox" name="Days" id="Wednesday" onclick="SetExceptions()"><label for="Wednesday">Wednesdays</label>
+                            <input type="checkbox" name="Days" id="Thursday" onclick="SetExceptions()"><label for="Thursday">Thursdays</label>
+                            <input type="checkbox" name="Days" id="Friday" onclick="SetExceptions()"><label for="Friday">Fridays</label>
+                            <br> <br> <b>Except:</b>
+
+                            <span id="ExceptDays">
+                            </span>
+                        </span>
+
+
+
+                        <div id="OneTimeDiv">
+                            Select Date:<input type="text" id="OneDate">
+                        </div>
+                    <p></p>
+                </fieldset>
+                <fieldset id="FieldAmt">
+                    <legend>Amount of field used</legend>
+                    <div id="SlotDiv">
+                        <input type="radio" name="FieldAmount" id="FieldWhole" onclick="WholeField();">Whole Field
+                        <span id="FieldSlotsSpan"><input type="radio" name="FieldAmount" id="FieldSlots" onclick="ShowSlots();">Practice Slots</span>
+                        <span id="FieldSplitsSpan"><input type="radio" name="FieldAmount" id="FieldSplits" onClick="ShowSplits();">Split Game Field </span>
+                        <div style="display:none" id="SlotsAmount"></div>
+                        <div style="display:none" id="SplitsAmount">
+                            <p>
+                                Field Split Numbers (e.g. 3 or 1-4)
+                                <input type="text" id="SplitsFields">
+                        </div>
+
+                </fieldset>
+                <div id="DescDiv">
+                    <fieldset>
+                        <legend>Description</legend>
+
+                        <input type="text" id="Description">
+                    </fieldset>
+                </div>
+                <p></p>
+                <fieldset id="DivisionDropDown">
+                    <legend>Division</legend>
+
+
+                    <select id="DivisionPicker"> </select>
+                </fieldset>
+                <div id="Classification">
+                    <fieldset id="EditClassification">
+                        <legend>Spreadsheet Tab</legend>
+                        <span id="Source" style="float: left"></span>
+                        <span id="ShowLineNumber">
+                            , Line:
+                            <span id="LineNo"></span>
+                        </span>
+                    </fieldset>
+                    <fieldset id="AddClassification">
+                        <p> Classification:</p>
+                        <input type="radio" name="eventtype" id="Travel Practice" onChange="SetRecGamesDropDown(false,'')">Travel Practice
+                        <input type="radio" name="eventtype" id="Rec Practice" onChange="SetRecGamesDropDown(false,'')">Rec Practice
+                        <input type="radio" name="eventtype" id="Rec Games" onChange="SetRecGamesDropDown(true,'')">Rec Games
+                        <input type="radio" name="eventtype" id="Clinics" onChange="SetRecGamesDropDown(false,'')">Clinics
+                        <input type="radio" name="eventtype" id="Unavailable" onChange="SetRecGamesDropDown(false,'')">Unavailable
+                        <input type="radio" name="eventtype" id="Assignments" onChange="SetRecGamesDropDown(false,'')">Other Assigned
+                    </fieldset>
+
+
+                </div>
+                <input type="button" value="Cancel" id="EditrowCancel" onclick="DoCancel()">
+
+                <input type="button" value="Submit" id="EditrowSubmit" onclick="DoSubmit()">
+                <input type="button" value="Add New Entry" id="EditrowAdd" onclick="DoAdd()">
+                <input type="button" value="Delete this entry" id="EditrowDelete" onclick="DoDelete()">
+                <input type="hidden" id="ExceptCount" value="0">
+
+            </div>
+        </form>
+
+    </div>
+    <div id="DisplayAgeGroup" class="ModalDialog">
+        <span id="closeit" class="close">&times;</span>
+        <div id="DisplayAgeGroupMain" class="modal-content">
+            <table id="DivisionDetail" class="xtable"></table>
+            <input type="button" value="Close" id="Submit" onclick="DoClose('DisplayAgeGroup')">
+        </div>
+    </div>
+    <div id="Loading">
+        <img src="https://cdn-images-1.medium.com/max/1600/1*W8cj-FRc58UozzcMWqVPZw.gif">
+
+    </div>
+    <div id="CreateSeason" class="ModalDialog">
+        <span id="closeit" class="close">&times;</span>
+        <div id="CreateSeasonMain" class="modal-content">
+            <fieldset>
+                <legend>Season Name (i.e. Fall2018)</legend>
+
+                <input type="text" id="NewSeasonName" onChange="CheckSeasonCreateButton()">
+                Copy Field Definitions from:
+                <select id="SeasonSeasonSelect"></select>
+
+            </fieldset>
+            <fieldset>
+                <legend>Season Dates</legend>
+                <input type="text" id="SeasonBeginDate">  to
+                <input type="text" id="SeasonEndDate">
+            </fieldset>
+            <br>
+            <br>
+
+            <fieldset>
+                <legend>Game Dates</legend>
+                <span id="GameDays">
+                </span>
+
+
+            </fieldset>
+
+
+            <input type="button" value="Create" id="CreateSeasonButton" onclick="CreateSeason(this)" disabled>
+            <input type="button" value="Cancel" id="Submit" onclick="DoClose('CreateSeason')">
+        </div>
+    </div>
+    <div hidden id="PostSlotsDiv">
+        <form id="PostSlots" action="https://script.google.com/macros/s/AKfycbzABG-POXfbvzsD8EvFAcaMu8XIWQK9p7NDbMLPKxF0/dev" method="get" target="_blank">
+            <input type="text" id="Action" name="Action"><br><br>
+
+            <input type="text" id="payload" name="payload"><br><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</body>
+</html>
+

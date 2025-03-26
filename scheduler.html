@@ -1,0 +1,128 @@
+﻿<html>
+<head>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="scheduler.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.js"></script>
+    <script src="scheduler.js"></script>
+    <style>
+    
+    </style>
+	    <link rel='SHORTCUT ICON' href='favicon.ico' type='image/x-icon' />
+
+</head>
+<body>
+<div>
+<div>
+
+</div>
+
+    
+
+    
+    <table class="Menu" id="Menu" border="1" hidden>
+      <tr>
+        <td class="TDMenu" id="AddGame" hidden>Add Game</td>
+        </tr>
+      <tr>
+        <td class="TDMenu" id="RemoveGame" hidden>Remove Game</td>
+        </tr>
+      <tr>
+        <td class="TDMenu" id="SwitchTimes" hidden>Switch Game Times</td>
+        </tr>
+      <tr>
+        <td class="TDMenu" id="SwitchOpponents" hidden>Switch Opponents</td>
+        </tr>
+        
+    </table>
+    
+    <h2 id="MainHeading" >DC Soccer Divisional Schedule Maker </h2>
+    <input id="SwitchViewbutton" type="button" value="" style="float: left;" hidden>&nbsp;&nbsp;
+    <label id="highlightDuplicatesLabel" style="float: left;" hidden><input id="highlightDuplicates" type="checkbox" style="float: left;" onclick="ToggleHighlightDupes(this);" checked>Highlight Repeat Opponents    </label>&nbsp;&nbsp;
+    <label id="save-result"></label>
+    
+    <div id="Wheel">
+        <img src="ajax-loader.gif">
+    </div>
+    <label id="Initializing">Initializing...</label>
+    <label id="Processing" hidden>
+        <h2>Submitting request...</h2>
+    </label>
+    <p>
+
+        <div id="MainDiv">
+
+
+
+            <table ID="FieldTable" class="ScheduleTable" >
+
+            </table>
+
+
+        
+        <table ID="TeamTable" class="ScheduleTable">
+
+        </table>
+</div>
+<div id="NewSchedule" hidden>
+<form>
+<label id="NewScheduleLabel"></label>
+<p>Click Create Schedule to create a new schedule. If you do not wish to create a new schedule yet, edit your spreadsheet and reload this page.<p>
+<input  type="button" value="Create New Schedule" onclick="RequestNewSchedule();" >
+</form>
+</div>
+
+<div id="PickDivision" hidden>
+<label id="PickDivisionLabel"></label>
+<form>
+Select a division and click below to load your schedule.<p>
+<select id="Divisions" onchange="OnDivisionChanged(this.value)">
+</select>
+<input  type="button" value="Load" onclick="Reload();" >
+</form>
+</div>
+<div id="RecoverableError" hidden>
+The schedule was created, but there were the following issues:
+            <table ID="IssueList"  >
+
+            </table>
+            <p>
+            <p>
+            You can either continue on with this schedule and fix it with manual edits, or go back, update your slot information and then make a new schedule.
+            <p>
+<form>
+    <div id="RecoveryButtons">
+        <input type="button" value="Continue to Schedule Editing" onclick="ContinueToEdit();">
+        <input type="button" value="Go Back and Remake Schedule" onclick="GoBackAndRemake();">
+    </div>
+</form>
+
+</div>
+
+<div id="AddDialog" title="Add a Game" hidden>
+<form>
+  <p>Select the two teams for this game and click OK.</p>
+  <select name="Home" id="SelectHome">  
+</select>
+  <select name="Away" id="SelectAway">  
+</select>
+  <select name="Field" id="SelectField">  
+</select>
+
+
+  </form>
+</div>
+<div id="DeleteDialog" title="Delete a Game" hidden>
+
+  <p> Are you sure you want to delete this game?</p>
+</div>
+<div id="NoSlotDialog" title="No Game Slots Available" hidden>
+  <p>A game cannot be added because there are no game time slots available. To add game slots, edit your spreadsheet and reload this page.</p>
+</div>
+
+
+<?!= include('Script.html'); ?>
+
+</div>
+</body>
+</html>

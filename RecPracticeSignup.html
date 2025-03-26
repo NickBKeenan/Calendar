@@ -1,0 +1,650 @@
+<head>
+    <title>DC Soccer Practice Field Signup
+
+    </title>
+    <link rel='SHORTCUT ICON' href='favicon.ico' type='image/x-icon' />
+
+</head>
+<div>
+    <style>
+        body {
+            font-family: arial;
+        }
+
+        #fieldlist {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            #fieldlist td, #fieldlist th {
+                font-size: 1.2em;
+                border: 1px solid #98bf21;
+                padding: 3px 7px 2px 7px;
+            }
+
+            #fieldlist th {
+                font-size: 1.4em;
+                text-align: left;
+                padding-top: 5px;
+                padding-bottom: 4px;
+                background-color: #A7C942;
+                color: #fff;
+            }
+
+            #fieldlist tr.alt td {
+                color: #000;
+                background-color: #EAF2D3;
+            }
+    </style>
+    <img src="DCSoccer.png" height="120"/>
+    <h2>DC Soccer Recreational Practice Field Signup</h2>
+    <div id="Wheel">
+        <img src="ajax-loader.gif">
+    </div>
+    <label id="timer">Initializing...</label>
+    <label id="Processing" hidden><h2>Submitting request...</h2></label>
+    <p>
+
+        <div id="MainDiv" hidden>
+
+            <form id="Form">
+
+                <table>
+                    <tr>
+                        <td>Name of person making request*</td>
+                        <td>
+                            <input type="text" name="Name"
+                                   id="Name">
+                        </td>
+                    </tr>
+                    <tr><td>Email*</td><td><input type="text" name="email" id="Email"></td></tr>
+                    <tr>
+                        <td>Division</td>
+                        <td>
+                            <select id="Division">
+                                <option value=""></option>
+                                <option value="CK">Coed Kindergarten</option>
+
+                                <option value="C1">Coed 1st Grade</option>
+                                <option value="G1">Girls 1st Grade</option>
+
+                                <option value="C2">Coed 2nd Grade</option>
+                                <option value="G2">Girls 2nd Grade</option>
+                                <option value="C3">Coed 3rd Grade</option>
+                                <option value="G3">Girls 3rd Grade</option>
+                                <option value="C4">Coed 4th Grade</option>
+                                <option value="G4">Girls 4th Grade</option>
+                                <option value="C5">Coed 5th Grade</option>
+                                <option value="G5">Girls 5th Grade</option>
+                                <option value="C6">Coed 6th Grade</option>
+                                <option value="G6">Girls 6th Grade</option>
+                                <option value="C7">Coed 7th Grade</option>
+                                <option value="G7">Girls 7th Grade</option>
+                                <option value="C8">Coed 8th Grade</option>
+                                <option value="G8">Girls 8th Grade</option>
+                                <option value="CHS">Coed High School </option>
+                                <option value="GHS">Girls High School</option>
+
+
+                            </select>
+                        </td>
+                    </tr>
+
+
+
+                    <tr><td>Team Name*</td><td> <input type="text" name="teamName" id="TeamName"></td></tr>
+
+
+                </table>
+
+                (*Required field)
+                <p>
+                    Show Availability by: Field <select id="Field" onchange="GetField(this)">
+                        <option value=""></option>
+                    </select>or Day of Week <select ID="DOW" onchange="GetDOW(this)">
+                        <option value=""></option>
+                        <option value="Sunday">Sunday</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+
+                    </select>
+                <p>
+                    <input type="button" value="Submit" id="Submit" onclick="DoSubmit()">
+                    <input type="reset">
+                <p>
+                    <fieldset>
+                        <label id="Retrieving" hidden><h2>Retrieving Field Availability...</h2></label>
+
+                        <table ID="fieldlist" hidden>
+                        </table>
+                    </fieldset>
+            </form>
+        </div>
+        <label id="SeasonDates"></label>
+        <div hidden id="Patient">
+            <h2>Please be patient</h2>
+
+            <fieldset>
+                It can take up to 60 seconds for your request to be processed during busy periods. Do
+
+                not go back or cancel the page if you do not get a response immediately.
+            </fieldset>
+        </div>
+        <div id="Note">
+            <h2>Important Note</h2>
+            <p>
+                <fieldset>
+                    Fields are scheduled with the expectation that they will be shared with other teams. Depending
+
+                    on field size, up to five teams per hour are scheduled. Please be
+
+                    reasonable and considerate with other teams.
+                </fieldset>
+            <p>
+        </div>
+        <div id="Results" hidden>
+            <input type="button" value="Submit another request" id="SubmitAnother" onclick="DoAnother()">
+            <label id="ResultsLabel"> </label>
+
+        </div>
+
+
+
+        <script>
+
+            class GoogleApi {
+                Constructor() {
+                }
+
+                StartSession(Season, User) {
+                    var params = {};
+                    params.CallBack = "onStartSuccess";
+                    params.OnFail = "OnFail";
+                    params.Action = "StartSession";
+                    params.Season = Season;
+                    params.User = User;
+                    this.GetGoogleData(params);
+
+
+                };
+
+                DaySlots(DOW, Season) {
+                    var params = {};
+                    params.CallBack = "onSlotSuccess";
+                    params.OnFail = "OnFail";
+                    params.Action = "DaySlots";
+                    params.Season = Season;
+                    params.DOW = DOW;
+                    this.GetGoogleData(params);
+
+                }
+                FieldSlots(field, Season) {
+                    var params = {};
+                    params.CallBack = "onSlotSuccess";
+                    params.OnFail = "OnFail";
+                    params.Action = "FieldSlots";
+                    params.Season = Season;
+                    params.field = field;
+                    this.GetGoogleData(params);
+
+                }
+                SubmitRequest(paramList, Season) {
+                    var params = paramList;
+                    params.CallBack = "onSubmitSuccess";
+                    params.OnFail = "OnFail";
+                    params.Action = "SubmitRequest";
+                    params.Season = Season;
+
+                    this.GetGoogleData(params);
+
+                }
+
+
+
+                GetGoogleData(params) {
+
+                    var script = document.createElement("script");
+                    // This script has a callback function that will run when the script has
+                    // finished loading.
+		// this script comes from the Google script named "Rec Signup"
+		// URL is https://script.google.com/home/projects/17Om_hWInXJdPMM1O6sqpFd_NCHV5-bWAenhd3yk2VLkvb2uwmlGWQp4w/edit
+                    var key = "AKfycbxkNuwUEXLVMK9LfLkMdQZnCisBbD9hvwtlFNbVUyxpiDH4s8foTT0hPnvy3NUlUxE";
+                    script.src = "https://script.google.com/macros/s/" + key +
+                        "/exec";
+
+                    var paramstr = "";
+                    for (var name in params) {
+                        if (paramstr.length > 0) {
+                            paramstr += "&";
+                        }
+                        paramstr += name + "=" + encodeURIComponent(params[name]);
+                    }
+                    if (paramstr.length > 0) {
+                        script.src += "?" + paramstr;
+                    }
+
+                    console.log(script.src);
+                    script.type = "text/javascript";
+                    document.getElementsByTagName("head")[0].appendChild(script);
+
+
+                }
+
+            }
+
+            var googleApi = new GoogleApi();
+
+            {
+                window.onload = OnLoad();
+            }
+
+            var g_Season = "";
+            var g_User = "";
+            function Season() {
+                var queryString = window.location.search;
+                queryString = queryString.toUpperCase();
+                var urlParams = new URLSearchParams(queryString);
+                g_Season = urlParams.get("SEASON");
+                g_User = urlParams.get("USER");
+                return g_Season;
+
+            }
+            function User() {
+                var queryString = window.location.search;
+                queryString = queryString.toUpperCase();
+                var urlParams = new URLSearchParams(queryString);
+                g_Season = urlParams.get("SEASON");
+                g_User = urlParams.get("USER");
+                return g_User;
+            }
+            /*********************************************************************************************************/
+            function OnLoad() {
+
+                googleApi.StartSession(Season(), User());
+
+            }
+
+            var starttime = 0;
+            var lasttimertime = 0;
+            var counter;
+            /*********************************************************************************************************/
+            function onStartSuccess(v) {
+                console.log(v);
+                LoadFieldNames(v[1]);
+                SetSeasonDates(v[2]);
+
+                if (v[0] > 0) {
+                    var count = v[0];
+                    var now = new Date();
+                    starttime = now.getTime() + count * 1000 + Math.random() * 120000; //add 0-120 seconds at random to try and spread the load
+                    lasttimertime = now.getTime();
+
+                    counter = setInterval(timer, 1000); //1000 will  run it every 1 second
+                }
+                else {
+                    DisplayPage();
+                }
+            }
+
+            /*********************************************************************************************************/
+
+
+            function SetSeasonDates(data) {
+
+                var label = document.getElementById("SeasonDates");
+
+                label.innerHTML = "<h3>Season Dates are " + DtoC(data[0]) + " to " + DtoC(data[1]) + "</h3>";
+
+
+            }
+
+
+            function DtoC(date) {
+                var indate = new Date(date);
+
+                var retval = (indate.getMonth() + 1) + '/' + indate.getDate() + '/' + indate.getFullYear();
+                return retval;
+            }
+            function LoadFieldNames(fieldslist) {
+                fieldslist.sort();
+                console.log(fieldslist);
+                var select = document.getElementById("Field");
+
+
+                for (var i = 0; i < fieldslist.length; i++) {
+                    var field = fieldslist[i];
+                    var el = document.createElement("option");
+                    el.textContent = field;
+                    el.value = field;
+                    select.appendChild(el);
+                }
+
+            }
+            /*********************************************************************************************************/
+            function timer() {
+
+                var now = new Date();
+                var timer = document.getElementById("timer");
+                if (now.getTime() - lasttimertime > 100000) {
+                    return;// if time has changed by over 100 seconds since the last time, just die ungracefully
+                    // I think there are people who monkey with their clock.
+                };
+                if (now.getTime() >= starttime) {
+                    clearInterval(counter);
+                    timer.style.display = "none";
+                    DisplayPage();
+                    return;
+                }
+                var days;
+                var hours;
+                var mins;
+                var secs;
+                lasttimertime = now.getTime();
+                var ncount = (starttime - now.getTime()) / 1000;
+                ncount = Math.floor(ncount);
+
+                secs = ncount % 60;
+                ncount -= secs;
+                ncount = ncount / 60;
+
+                mins = ncount % 60;
+                ncount -= mins;
+                ncount = ncount / 60;
+
+                hours = ncount % 24;
+                ncount -= hours;
+                ncount = ncount / 24;
+                days = ncount;
+
+                var ltext = "Signup will begin in " + days + " days, " + hours + " hours, " + mins + " minutes, " + Math.round(secs) + " seconds. The form will automatically load at that time." +
+                    '<p><p> To see a list of available fields and times <a href="https://how7uqmdmfhzpqzimumiig.on.drv.tw/calendar/RecPracticeAvailability.html" target="_blank">click here</a>.';
+                timer.innerHTML = ltext;
+                Hide("Wheel");
+            }
+            /*********************************************************************************************************/
+            function Hide(id) {
+                var element = document.getElementById(id);
+                element.style.display = "none";
+            }
+            /*********************************************************************************************************/
+            function Show(id) {
+                var element = document.getElementById(id);
+                element.style.display = "block";
+            }
+            /*********************************************************************************************************/
+            function DisplayPage() {
+                Hide("timer");
+                Hide("Results");
+                Hide("Wheel");
+
+                Show("MainDiv");
+                Show("Note");
+
+                Hide("fieldlist");
+
+                document.getElementById("Name").select();
+
+            }
+            /*********************************************************************************************************/
+            function DisableButtons() {
+
+
+                var Field = document.getElementById("Field");
+                Field.disabled = true;
+
+                var DOW = document.getElementById("DOW");
+                DOW.disabled = true;
+
+                var Submit = document.getElementById("Submit");
+                Submit.disabled = true;
+
+
+
+            }
+            /*********************************************************************************************************/
+            function EnableButtons() {
+                var Field = document.getElementById("Field");
+                Field.disabled = false;
+                var DOW = document.getElementById("DOW");
+                DOW.disabled = false;
+                var Submit = document.getElementById("Submit");
+                Submit.disabled = false;
+            }
+            /*********************************************************************************************************/
+
+            function GetDOW(obj) {
+                Hide("fieldlist");
+                if (obj.selectedIndex == 0) {
+                    return;
+                }
+                Show("Retrieving");
+                Show("Wheel");
+
+                var DOW = obj.options[obj.selectedIndex].value;
+
+                DisableButtons();
+
+                googleApi.DaySlots(DOW, Season());
+                obj.blur();
+            }
+
+            /*********************************************************************************************************/
+            function GetField(obj) {
+                Hide("fieldlist");
+                if (obj.selectedIndex == 0) {
+                    return;
+                }
+
+
+                Show("Retrieving");
+                Show("Wheel");
+
+                DisableButtons();
+                var Field = obj.options[obj.selectedIndex].value;
+
+                googleApi.FieldSlots(Field, Season());
+                obj.blur();
+            }
+
+            /*********************************************************************************************************/
+
+            function onSlotSuccess(v) {
+                // called when either the DOW or field select returns a payload
+                var table = document.getElementById("fieldlist");
+
+                Show("fieldlist");
+                Hide("Retrieving");
+                Hide("Wheel");
+
+                while (table.rows.length > 0) {
+                    table.deleteRow(0);
+                }
+
+                var x;
+                for (x = 0; x < v.length; x++) {
+                    var row, cell;
+                    row = table.insertRow(-1);
+                    if (x % 2 == 1) {
+                        row.className = "alt";
+                    }
+                    cell = row.insertCell(0);
+                    cell.innerHTML = v[x][0];;
+
+                    cell = row.insertCell(1);
+                    cell.innerHTML = v[x][1];;
+                    cell.id = v[x][1];
+
+                    cell = row.insertCell(2)
+                    cell.innerHTML = v[x][2];;
+                    cell.id = v[x][3];
+
+                    cell = row.insertCell(3)
+                    cell.innerHTML = '<input type="radio" id="radio' + x + '">';;
+
+
+
+
+                }
+
+                if (v.length == 0) {
+                    var row, cell;
+                    row = table.insertRow(-1);
+                    cell = row.insertCell(0);
+                    cell.innerHTML = "No Space is Available";;
+
+                }
+
+                EnableButtons();
+
+            }
+
+            /*********************************************************************************************************/
+
+            var teamlist = ""; // try to keep people from signing up for more than one slot per team.
+
+            function DoSubmit() {
+                var Field;
+                var DOW;
+                var Time;
+                var Name = document.getElementById("Name").value;
+                var TeamName = document.getElementById("TeamName").value;;
+                var Division = document.getElementById("Division").value;;
+                var Email = document.getElementById("Email").value;;
+                if (Name == null || Name == "") {
+                    alert("Your Name must be filled out");
+                    return false;
+
+                }
+                if (Email == null || Email == "" || !ValidateEmail(Email)) {
+                    alert("Your Email must be filled out and a valid email address");
+                    return false;
+
+                }
+
+                if (TeamName == null || TeamName == "") {
+                    alert("Your Team Name must be filled out");
+                    return false;
+
+                }
+                if (Division == null || Division == "") {
+                    alert("You must select a division");
+                    return false;
+
+                }
+
+
+                if (teamlist.indexOf(Division + '|' + TeamName) >= 0) {
+                    alert("You have already reserved a field for team " + TeamName + ". Until every team has had a chance you cannot reserve a second slot.");
+                    return false;
+
+                }
+
+                var table = document.getElementById("fieldlist");
+                var rows = table.rows.length;
+                var x;
+                var selection = -1;
+                for (x = 0; x < rows; x++) {
+                    var label = "radio" + x;
+                    var radio = document.getElementById(label);
+                    if (radio != null && radio.checked) {
+                        selection = x;
+
+                    }
+                }
+                if (selection == -1) {
+                    alert("You must select a field and time");
+                    return false;
+                }
+
+                var a = new Array();
+                a.TeamName = TeamName;
+                a.Email = Email;
+                a.Name = Name;
+                a.Field = table.rows[selection].cells[0].innerHTML;
+                a.DOW = table.rows[selection].cells[1].id;
+                a.Time = table.rows[selection].cells[2].id;
+                a.Division = Division;
+                a.User = User();
+                a.Browser = navigator.userAgent;
+
+
+                Hide("MainDiv");
+
+                Show("Patient");
+                Show("Wheel");
+                Show("Processing");
+
+
+                googleApi.SubmitRequest(a, Season());
+                return false;
+
+            }
+            /*********************************************************************************************************/
+            function onSubmitSuccess(v) {
+                Hide("Patient");
+                Hide("Wheel");
+                Hide("Processing");
+
+                Hide("Note");
+
+
+                Show("Results");
+
+                var ResultsLabel = document.getElementById("ResultsLabel");
+
+                if (v[0]) {
+                    ResultsLabel.innerHTML = "<H1>Reservation Successful:</H1><p>You have been assigned the following field time<p><li><H2>" + v[1] + "</H2><p>"
+                        + '  <p> <h1 style="color:red;">To preserve this record please screenshot this page.</h1><p>';
+                    var TeamName = document.getElementById("TeamName").value;
+                    var Division = document.getElementById("Division").value;
+                    var TeamID = Division + '|' + TeamName;
+                    teamlist = teamlist + TeamID + "*";
+                }
+                else {
+                    ResultsLabel.innerHTML = "<H1>Reservation Failed:</H1><p>" + v[1] + "<p>";
+                }
+
+
+            }
+            /*********************************************************************************************************/
+            function DoAnother()
+            // called after success, user wants to do another field
+            {
+                var Field = document.getElementById("Field");
+                var DOW = document.getElementById("DOW");
+                var Division = document.getElementById("Division");
+                var TeamName = document.getElementById("TeamName");
+
+                Field.selectedIndex = 0;
+                DOW.selectedIndex = 0;
+                Division.selectedIndex = 0;
+                TeamName.value = "";
+
+                DisplayPage();
+            }
+            /*********************************************************************************************************/
+            function ValidateEmail(x) {
+
+                var atpos = x.indexOf("@");
+                var dotpos = x.lastIndexOf(".");
+                if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= x.length) {
+
+                    return false;
+                }
+
+                return true;
+            }
+
+            function OnFail(e) {
+                console.log(e);
+                alert(e.toString());
+            }
+
+
+        </script>
+
+</div>

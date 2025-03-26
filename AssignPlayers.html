@@ -1,0 +1,430 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="https://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="Assignments.css">
+
+
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.js"></script>
+    <script src="download.js"></script>
+
+
+    <title>Assign Players</title>
+    <link rel='SHORTCUT ICON' href='favicon.ico' type='image/x-icon' />
+
+    <style>
+        .xtable, .xtable tr, .xtable th, .xtable td {
+            border-color: #ccc;
+            border-style: solid;
+            border-width: 1px;
+            border-collapse: collapse;
+            font-family: sans-serif;
+        }
+
+            .xtable th, .xtable td {
+                text-align: left;
+                padding: 0.5em;
+                padding-left: 1em;
+                padding-right: 1em;
+            }
+
+            .xtable tr:nth-child(even) {
+                background-color: #eee;
+            }
+
+        #urlButton:hover {
+            box-shadow: 0px 0px 2px #08f;
+        }
+
+        .blinking {
+            animation: blinkingText 2.0s infinite;
+        }
+
+        @keyframes blinkingText {
+            0% {
+                color: #000;
+            }
+
+            66% {
+                color: transparent;
+            }
+
+            100% {
+                color: #000;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <img src="stoddertlogo.png">
+    <div>
+        <h1>DC Stoddert Soccer &mdash; Returning Player Processing</h1>
+        <p></p><b>Input URL of Google Sheet containing players to be sorted and click "Process." </b>
+        The data comes from the Blue Sombrero saved report "Unallocated Players -- Spring 2019." Click "Open Spreadsheet" to view the spreadsheet without processing.<p></p>
+
+        <p>
+        </p>Full instructions are <a href="https://docs.google.com/document/d/1geTAnc1wNMh_YJhaY1-XbRiomPESZyOsoXd4XHBryBg/edit">here</a>   <p>
+        </p>
+        <input type="text" id="urlInput" autofocus="true" autocomplete="off" placeholder="Put the URL of spreadsheet here" value="https://docs.google.com/spreadsheets/d/1nyRMxUk4Nvsr1E8zPc1CobHHr5czjBgBUKatxI75qkQ/edit#gid=0" size="90">
+        <button id="urlButton">Process</button> <button id="OpenSpreadsheet" onclick="OpenSpreadsheet()">Open Spreadsheet</button><p></p><p></p>
+        <label><input type="checkbox" id="ProcessCoaches">Process Unassigned Coaches too? </label>
+        <p></p>
+        <a target="_blank" href="https://sports.bluesombrero.com/Default.aspx?tabid=282381&mid=310742&subctl=savedreports">Direct Link to Blue Sombrero Reports</a><p></p>
+        <a target="_blank" href="https://sports.bluesombrero.com/Default.aspx?tabid=279181">Direct Link to Blue Sombrero Team Page</a><p></p><p></p>
+        <a target="_blank" href="https://docs.google.com/spreadsheets/d/1Ucf00xaaaNzwkjiPTjwVljWr6SfTL8KuKUnBHRBZcx4/edit#gid=420483910">Enter Name Changes</a>
+        <p></p>  <span class="blinking" id="Processing" hidden>Processing...</span>
+    </div>
+    <br />
+    <div id="divisions" style="display:none">
+        <h3>Division import files created:</h3>
+        <table id="divisionList" class="xtable">
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Player Count</th>
+
+                </tr>
+            </thead>
+
+        </table>
+
+    </div>
+
+    <hr />
+    <div id="exceptions2" style="display:none">
+        <h3>Players who have requested to return but registered for a different division from the successor division to their previous team:</h3>
+        <table id="exceptionList" class="xtable">
+            <tr>
+                <th>Player ID</th>
+                <th>Player Name</th>
+                <th>Successor to Previous Division</th>
+                <th>Registered Division</th>
+                <th>Previous Team</th>
+                <th>Returning to Previous Team</th>
+                <th>Request</th>
+            </tr>
+        </table>
+    </div>
+
+    <hr />
+    <div id="exceptions1" style="display:none">
+        <h3>Players who are returning but have requested not to return to their previous team:</h3>
+        <table id="noReturnList" class="xtable">
+            <tr>
+                <th>Player ID</th>
+                <th>Player Name</th>
+                <th>Successor to Previous Division</th>
+                <th>Registered Division</th>
+                <th>Previous Team</th>
+                <th>Returning to Previous Team</th>
+                <th>Request</th>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        // source url for script-thing
+        var srcUrl = "https://script.google.com/macros/s/AKfycbzyA_QeAfHe9HVgMyMV6ZY2u9LksyPcF5zvU5WrJCkgkTkYoU4/exec";
+        var exceptionList = document.getElementById("exceptionList"); // table of some mismatch
+        var noReturnList = document.getElementById("noReturnList"); // table of not returning
+        var submitButton = document.getElementById("urlButton");
+        var divisionList = document.getElementById("divisionList");
+
+        function OpenSpreadsheet()
+        {
+            var url = document.getElementById("urlInput").value;
+            var win = window.open(url, '_blank');
+            win.focus();
+        }
+        // function called when button pressed
+        submitButton.onclick = function ()
+        {
+            // disable submit button while processing data
+            try
+            {
+                this.disabled = "true";
+                document.getElementById("Processing").style.display = "block";
+                divisionList.parentElement.style.display = "none";
+                exceptionList.parentElement.style.display = "none";
+                noReturnList.parentElement.style.display = "none";
+
+                // save value of url in input as urlValue
+                var urlValue = document.getElementById("urlInput").value;
+                var ProcessCoaches = document.getElementById("ProcessCoaches").checked;
+                console.log(ProcessCoaches);
+                // get script, which creates a script to call ProcessData
+                var scripty = document.createElement("script");
+                if (urlValue == "")
+                {
+                    throw ("Input URL is empty");
+                }
+                scripty.src = (srcUrl + "?ProcessCoaches=" + ProcessCoaches + "&input=" + urlValue);
+                console.log(scripty.src);
+                scripty.type = "text/javascript";
+                document.getElementsByTagName("head")[0].appendChild(scripty);
+            } catch (e)
+            {
+                alert(e);
+                this.removeAttribute("disabled");
+            }
+        }
+        // define an error routine for bad button pushing
+
+        function ErrorRoutine(e)
+        {
+            alert(e)
+            // re-enable sumbit button
+            document.getElementById("Processing").style.display = "none";
+
+            submitButton.removeAttribute("disabled");
+        }
+
+        //--------------------------------------------------------------------------------------------
+
+        function ProcessData(array_placed, coachlist)
+        {
+            console.log(coachlist);
+            var divisions = new Map();
+
+            var noReturn = [];
+            var transferDivisions = [];
+
+            var x;
+            var headers = array_placed[0];
+			console.log(array_placed);
+            for (y = 1; y < array_placed.length; y++)
+            {
+				
+                var row = array_placed[y];
+                var item = [];
+                for (var x = 0; x < headers.length; x++)
+                {
+                    item[headers[x]] = row[x];
+                }
+                item.type = "Player";
+
+                // classify each array item
+                if (item.ReturnToPrevTeam == "No" && item.PreviousTeam != "None")
+                {
+                    noReturn.push(item);
+
+                } else if (  item.PreviousDivision.indexOf(item.Division)==-1 && item.PreviousDivision != "None")
+                {
+                    transferDivisions.push(item);
+                } else
+                {
+
+                    if (item.PreviousTeam == "Unallocated" || item.PreviousTeam == "None")
+                    {
+                        item.PreviousTeam = "New Players";
+                    }
+                    var key = item.Division;
+                    key = key.replace(/\s/g, "_");
+                    var divisionRec = divisions.get(key)
+                    if (divisionRec == undefined)
+                    {
+                        divisionRec = [];
+                    }
+                    divisionRec.push(item);
+                    divisions.set(key, divisionRec);
+
+                }
+
+            }
+
+            headers = coachlist[0];
+            for (y = 1; y < coachlist.length; y++)
+            {
+                var row = coachlist[y];
+                var item = [];
+                for (var x = 0; x < headers.length; x++)
+                {
+                    item[headers[x]] = row[x];
+                }
+                item.type = "Coach";
+                var key = item.Division;
+                key = key.replace(/\s/g, "_");
+                var divisionRec = divisions.get(key)
+                if (divisionRec == undefined)
+                {
+                    divisionRec = [];
+                }
+                divisionRec.push(item);
+                divisions.set(key, divisionRec);
+
+            }
+
+            while (divisionList.rows.length > 1)
+            {
+                divisionList.deleteRow(1);
+            }
+            ProcessDivisions(divisions);
+            // dealing with already assigned people
+
+            //array_placed.forEach( )
+            // delete old exception tables
+            while (exceptionList.rows.length > 1)
+            {
+                exceptionList.deleteRow(1);
+            };
+            while (noReturnList.rows.length > 1)
+            {
+                noReturnList.deleteRow(1);
+            };
+            // only if there are exceptions (exception array length =/= 0), display exception tab
+            displayTable(noReturn, noReturnList);
+            displayTable(transferDivisions, exceptionList);
+            // re-enable the submit button
+            document.getElementById("Processing").style.display = "none";
+
+            submitButton.removeAttribute("disabled");
+        }
+
+        function ProcessDivisions(divisions)
+        {
+            var x;
+            var iterator = divisions.keys();
+            if (divisions.size > 0)
+            {
+                divisionList.parentElement.style.display = "block";
+            }
+
+            for (x = 0; divisions.size > 0 && x < 10; x++)
+            {
+                var entry = iterator.next();
+                var key = entry.value;
+
+
+                var item = divisions.get(key);
+                var row = divisionList.insertRow(-1);
+                var cell = row.insertCell(-1);
+                fname = key + ".csv";
+                cell.innerHTML = fname;
+                var cell = row.insertCell(-1);
+                var coachcount = 0;
+                for (var y = 0; y < item.length; y++)
+                {
+                    if (item[y].type == "Coach")
+                    {
+                        coachcount++;
+                    }
+                }
+                if (coachcount > 0)
+                {
+                    cell.innerHTML = (item.length - coachcount) + " Players, " + coachcount + " Coaches";
+                }
+
+                else
+                {
+                    cell.innerHTML = item.length;
+                }
+                download(item, fname);//
+                divisions.delete(key);
+            }
+            if (divisions.size > 0)
+            {
+                setTimeout(function () { ProcessDivisions(divisions); }, 1000);
+            }
+        }
+        function displayTable(arrayOf, tableElement)
+        {
+            if (arrayOf.length > 0)
+            {
+                // display the exceptions1 div
+                tableElement.parentElement.style.display = "block";
+                // go through exceptions array and add table rows for each execption
+                arrayOf.forEach(function (item)
+                {
+                    // create a tr and 3 td
+
+                    var newRow = document.createElement("tr");
+                    var td1 = document.createElement("td");
+                    var td2 = document.createElement("td");
+                    var td3 = document.createElement("td");
+                    var td4 = document.createElement("td");
+                    var td5 = document.createElement("td");
+                    var td6 = document.createElement("td");
+                    var td7 = document.createElement("td");
+                    // add stuff to proper column
+                    td1.innerText = item.PlayerID; // player id
+                    td2.innerText = item.Name; // player name
+                    td3.innerText = item.PreviousDivision; // player old division
+                    td4.innerText = item.Division; // player new division
+                    td5.innerText = item.PreviousTeam; // player old team name
+                    td6.innerText = item.ReturnToPrevTeam; // player exception type
+                    td7.innerText = item.Request;
+                    // append all three td to table row
+                    newRow.appendChild(td1);
+                    newRow.appendChild(td2);
+                    newRow.appendChild(td3);
+                    newRow.appendChild(td4);
+                    newRow.appendChild(td5);
+                    newRow.appendChild(td6);
+                    newRow.appendChild(td7);
+                    // append new row to existing table
+                    tableElement.appendChild(newRow);
+
+                })
+            } else
+            {
+                tableElement.parentElement.display = "none";
+            }
+        }
+        function download(item, fileName)
+        {
+            var content = '';
+            var mimeType = 'text/csv;encoding:utf-8';
+            content = "TeamName,PlayerID,VolunteerID,VolunteerTypeID,Player Name,Team Personnel Name,Team Personnel Role";
+
+            for (var x = 0; x < item.length; x++)
+            {
+                content += '\n';
+                if (item[x].type == "Coach")
+                {
+                    row = [item[x].TeamName, "", item[x].VolunteerID, item[x].VolunteerType, "", "", "", ];
+
+                }
+                else
+                {
+                    row = [item[x].PreviousTeam, item[x].PlayerID, "", "", item[x].Name, "", "", ];
+                }
+                content += row.join(",");
+            }
+
+            var a = document.createElement('a');
+            mimeType = mimeType || 'application/octet-stream';
+
+            if (navigator.msSaveBlob)
+            { // IE10
+                console.log("IE10");
+                navigator.msSaveBlob(new Blob([content],
+                {
+                    type: mimeType
+                }), fileName);
+            }
+            else if (URL && 'download' in a)
+            { //html5 A[download]
+                a.href = URL.createObjectURL(new Blob([content],
+                {
+                    type: mimeType
+                }));
+                a.setAttribute('download', fileName);
+                document.body.appendChild(a);
+                var result = a.click();
+
+                document.body.removeChild(a);
+            }
+            else
+            {
+                console.log("Default");
+                location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
+            }
+        }
+    </script>
+</body>
+</html>

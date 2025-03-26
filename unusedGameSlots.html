@@ -1,0 +1,326 @@
+<head>
+    <link rel='SHORTCUT ICON' href='favicon.ico' type='image/x-icon' />
+
+</head>
+<div>
+ <style>
+
+  #fieldlist
+{
+font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+width:100%;
+
+}
+#fieldlist table
+{
+  width:1900px;
+}
+#fieldlist td, #fieldlist th 
+{
+font-size:1em;
+border:1px solid black;
+padding:3px 7px 2px 7px;
+}
+#fieldlist th 
+{
+font-size:1.1em;
+text-align:left;
+padding-top:5px;
+padding-bottom:4px;
+background-color:#A7C942;
+color:#ffffff;
+}
+#fieldlist td
+{
+
+color:black;
+}
+#fieldlist  td.free 
+{
+
+background-color:green;
+}
+#fieldlist td.unavailable 
+{
+
+background-color:gray;
+}
+#fieldlist  td.overbooked
+{
+
+background-color:red;
+}
+#fieldlist  td.full
+{
+
+background-color:white;
+}
+#fieldlist  td.partial 
+{
+
+background-color:yellow;
+}
+
+#fieldlist  td.fieldlabel
+{
+
+background-color:white;
+}
+
+#fieldlist  td.slottime 
+{
+
+background-color:white;
+}
+
+h1, h2, h3
+{font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+ font-weight: normal;
+}
+
+</style>
+
+</div>
+
+<div>
+<H2 >
+Unassigned Rec Game slots
+</h2>
+
+<div id="Wheel" >
+<img src="ajax-loader.gif">
+</div>
+<label id="label1" >Initializing...</label>
+
+<table ID="fieldlist"  >
+
+</table>
+
+<div>
+    <script src="GoogleApi.js"></script>
+    <script>
+        
+        var googleApi = new GoogleApi();
+
+        var params = {};
+        params.CallBack = "onSuccess";
+        params.OnFail = "OnFail";
+        params.Action = "GetAllDivisionSchedules";
+
+        googleApi.GetGoogleData(params);
+
+        const EmptySlotSort = (a, b) => {
+            console.log(a);
+            if (a.date == b.date) { return a.Field+ a.DOW + a.Time < b.Field +b.DOW+ b.Time?-1:1 }
+            else {
+                return new Date(a.date).getTime() < new Date(b.date).getTime() ? -1 : 1;
+            }
+        };
+        class EmptySlots {
+            constructor()
+            {
+                this.emptylist = [];
+
+                ;
+            }
+            Sort() {
+                this.emptylist.sort(EmptySlotSort);
+            }
+            Add(slotlist, division)
+            {
+                
+                var x;
+                for (x = 0; x < slotlist.length; x++) {
+                    var row = slotlist[x];
+                    row.Division = division;
+                    this.emptylist.push(row);
+                }
+            }
+            GetSize() {
+                return this.emptylist.length;
+            }
+            GetText(rownum, htmlrow) {
+                
+                console.log(this.emptylist[rownum]);
+                var Row = this.emptylist[rownum];
+                var cell = htmlrow.insertCell(0);
+                cell.innerHTML = Row.date;
+                var cell = htmlrow.insertCell(-1);
+                cell.innerHTML = Row.Field;
+                var cell = htmlrow.insertCell(-1);
+                cell.innerHTML = Row.DOW;
+                var cell = htmlrow.insertCell(-1);
+                cell.innerHTML = Row.Time;
+                var cell = htmlrow.insertCell(-1);
+                cell.innerHTML = Row.Division;
+            }
+        }
+        class SlotList {
+            constructor(slotarray)
+            {
+               
+                var weeks = slotarray[1][0];
+               
+                var x;
+
+                this.weeks = [];
+                for (x = 3; x < weeks.length; x++)
+                    this.weeks.push(new Date(weeks[x]).toLocaleDateString());
+                this.slots = [];
+                for (x = 1; x < slotarray[1].length; x++) {
+                    var row = {};
+                    row.Field = slotarray[1][x][0];
+                    var gametime = new Date(slotarray[1][x][2]);
+                    row.Time = gametime.toLocaleTimeString();
+                        row.DOW = slotarray[1][x][1];
+                        row.slots = slotarray[1][x].slice(3);
+                    this.slots.push(row);
+
+                }
+
+            };
+            AddGames(scheduledata)
+            {
+                var x;
+                var nDate;
+                var nDOW;
+                var nTime;
+                var nField;
+               
+                scheduledata = scheduledata[1];
+                if (scheduledata.length == 0)
+                    return;
+                var headers = scheduledata[0];
+               
+                nDate = headers.indexOf("Date");
+                nDOW = headers.indexOf("Day-Of-Week");
+                nTime = headers.indexOf("Start Time");
+                nField = headers.indexOf("Field Name");
+
+                for (x = 1; x < scheduledata.length; x++)
+                {
+                    var row = scheduledata[x];
+                    
+                    var date = new Date(row[nDate]).toLocaleDateString();
+                    var DOW = row[nDOW];
+                    var Time = new Date(row[nTime]).toLocaleTimeString();
+                    var Field = row[nField];
+                    this.MarkSlot(date, DOW, Time, Field)
+                }
+            }
+            MarkSlot(date, DOW, Time, Field)
+            {
+                var nWeek;
+                nWeek = this.weeks.indexOf(date);
+                var x;
+                var done = false;
+                for (x = 0; x < this.slots.length && !done; x++)
+                {
+                    var row = this.slots[x];
+                    if (DOW == row.DOW && Time == row.Time && Field == row.Field) {
+                        
+                        row.slots[nWeek] = "YES";
+                        done = true;
+                    }
+                }
+                if (!done) {
+                    console.log(date, DOW, Time, Field);
+                    console.log("Not Found");
+
+                }
+            }
+            GetEmpties() {
+                var retval = [];
+                var x;
+                var week;
+                console.log(this.weeks);
+
+                for (week = 0; week < this.weeks.length; week++) {
+                    for (x = 0; x < this.slots.length; x++) {
+                        var row = this.slots[x];
+                        if (row.slots[week].length == 0)
+                        {
+                            var slot = {};
+                            slot.date = this.weeks[week];
+                            slot.Field = row.Field;
+                            slot.Time = row.Time;
+                            slot.DOW = row.DOW;
+                            retval.push(slot);
+                        }
+                    }
+                }
+                return retval;
+            }
+
+        }
+
+        function onSuccess(v) {
+
+            var wheel = document.getElementById("Wheel");
+            wheel.style.display = "none";
+            var label = document.getElementById("label1");
+            label.style.display = "none";
+
+            var table = document.getElementById("fieldlist");
+
+
+            while (table.rows.length > 0) {
+                table.deleteRow(0);
+            }
+
+            if (v.length == 0) {
+                var row, cell;
+                row = table.insertRow(-1);
+                cell = row.insertCell(0);
+                cell.innerHTML = "No Data Available";;
+                return;
+            }
+
+
+            var i;
+            var row, cell;
+
+            // structure of each row is:
+            // Division prefix
+            // Teams tab
+            // Schedule Data
+            // Slots
+            var empties= new EmptySlots();
+            for (i = 0; i < v.length; i++) {
+                var datarow = v[i];
+                var slotlist = new SlotList(datarow[3]);
+                slotlist.AddGames(datarow[2]);
+                empties.Add(slotlist.GetEmpties(), datarow[0]);
+
+            }
+
+            var x;
+            empties.Sort();
+            for (x = 0; x < empties.GetSize(); x++) {
+
+
+                row = table.insertRow(-1);
+                
+                empties.GetText(x, row);;
+            }
+
+            
+
+
+
+
+
+        }
+
+        /*********************************************************************************************************/
+        function FailHandler(e) {
+            alert("The called function failed");
+            alert(e.message);
+        }
+
+    </script>
+
+</div>
+
+
+</div>

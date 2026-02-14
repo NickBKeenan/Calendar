@@ -212,7 +212,7 @@
                     // finished loading.
 		// this script comes from the Google script named "Rec Signup"
 		// URL is https://script.google.com/home/projects/17Om_hWInXJdPMM1O6sqpFd_NCHV5-bWAenhd3yk2VLkvb2uwmlGWQp4w/edit
-                    var key = "AKfycbxkNuwUEXLVMK9LfLkMdQZnCisBbD9hvwtlFNbVUyxpiDH4s8foTT0hPnvy3NUlUxE";
+                    var key = "AKfycbwZbvnjDWRfvxWqndRIINZw359o43Ldu5fBdX21bc4sRuTXlJ40D__--CZjKOQ2PWJT";
                     script.src = "https://script.google.com/macros/s/" + key +
                         "/exec";
 
@@ -273,7 +273,7 @@
             var counter;
             /*********************************************************************************************************/
             function onStartSuccess(v) {
-                console.log(v);
+                //console.log(v);
                 LoadFieldNames(v[1]);
                 SetSeasonDates(v[2]);
 
@@ -311,7 +311,7 @@
             }
             function LoadFieldNames(fieldslist) {
                 fieldslist.sort();
-                console.log(fieldslist);
+                //console.log(fieldslist);
                 var select = document.getElementById("Field");
 
 
@@ -463,6 +463,12 @@
                 while (table.rows.length > 0) {
                     table.deleteRow(0);
                 }
+                // v is
+                // Field 0
+                // DOW  1
+                // Time  2
+                // row in slots table 3 
+                // except 4
 
                 var x;
                 for (x = 0; x < v.length; x++) {
@@ -475,12 +481,16 @@
                     cell.innerHTML = v[x][0];;
 
                     cell = row.insertCell(1);
-                    cell.innerHTML = v[x][1];;
-                    cell.id = v[x][1];
+                    cell.innerHTML = v[x][1];; //dow;
+                    if( v[x][4].length > 0)
+                    {
+                        cell.innerHTML+=" Except "+ v[x][4];
+                    }
+                    cell.id = v[x][1]+'|'+v[x][2]; // dow+time
 
-                    cell = row.insertCell(2)
-                    cell.innerHTML = v[x][2];;
-                    cell.id = v[x][3];
+                    cell = row.insertCell(2);
+                    cell.innerHTML = v[x][2];; //time
+                    cell.id = v[x][3]; //row
 
                     cell = row.insertCell(3)
                     cell.innerHTML = '<input type="radio" id="radio' + x + '">';;
@@ -565,13 +575,15 @@
                 a.Email = Email;
                 a.Name = Name;
                 a.Field = table.rows[selection].cells[0].innerHTML;
-                a.DOW = table.rows[selection].cells[1].id;
-                a.Time = table.rows[selection].cells[2].id;
+                a.Timeslot=table.rows[selection].cells[1].id;
+                
+                a.Row = table.rows[selection].cells[2].id;
+                
                 a.Division = Division;
                 a.User = User();
                 a.Browser = navigator.userAgent;
 
-
+                console.log(a);
                 Hide("MainDiv");
 
                 Show("Patient");
@@ -597,7 +609,7 @@
                 var ResultsLabel = document.getElementById("ResultsLabel");
 
                 if (v[0]) {
-                    ResultsLabel.innerHTML = "<H1>Reservation Successful:</H1><p>You have been assigned the following field time<p><li><H2>" + v[1] + "</H2><p>"
+                    ResultsLabel.innerHTML = "<H1>Reservation Successful:</H1><p>You have been assigned the following field time<p><H2>" + v[1] + "</H2><p>"
                         + '  <p> <h1 style="color:red;">To preserve this record please screenshot this page.</h1><p>';
                     var TeamName = document.getElementById("TeamName").value;
                     var Division = document.getElementById("Division").value;

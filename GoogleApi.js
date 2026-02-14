@@ -147,7 +147,8 @@ class GoogleApi
 	// Script is "Assignments Back End"
 // URL is https://script.google.com/home/projects/12TOM9UthtmESecvDTcfA0KgsEYXnK3V2-YjwTX-MzjTRo_0B2l5NZ9ca/edit
 
-        var key = "AKfycbzfPXbeTCDAQ__dHCcbv3UJa2B8-nSRqvAVeXlMGnzP09OI6yVc1iVZJt-U4FNce74X";
+        
+        var key="AKfycbxIeaUzc2A1XSx9Ac773EDlxLfTX9mZr3iQS--8ZBfcxUXb_6vU-ydvSxMWt-UzjUT_";
 
         script.src = "https://script.google.com/macros/s/"+key+"/exec";
         //script.src = "https://script.google.com/macros/s/AKfycbzHfGHAaXEFP8hApPkEiXDr8URZZcwg8FwImwqRi1fFW2JyDA8kbMIaOtfrKChVH3Lywg/exec";
@@ -158,7 +159,7 @@ class GoogleApi
             {
                 paramstr += "&";
             }
-            paramstr += name + "=" + encodeURIComponent(params[name]);
+            paramstr += name + "=" + encodeURIComponent(params  [name]);
         }
         if (paramstr.length > 0)
         {

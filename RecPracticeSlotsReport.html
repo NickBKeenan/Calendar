@@ -1,5 +1,5 @@
-<head>
-    <title>DC Soccer Practice Field Availability</title>
+﻿<head>
+    <title>DC Soccer Rec Practice Field Report</title>
     <link rel='SHORTCUT ICON' href='favicon.ico' type='image/x-icon' />
 
 </head>
@@ -85,28 +85,27 @@ h1, h2, h3
 
 <div>
     <img src="DCSoccer.png" height="120" />
-    <h1>DC Soccer Recreational Practice Field Availability</h1>
+    <h1>Available Unassigned Field Slots</h1>
 
     <h1 hidden>
         Coming soon. Field avilability is not quite ready yet.
     </h1>
     <H2>
-        Field Availability changes <i>frequently</i> in the run-up to the season.
-        <p>Fields often become available after the start of sign-up.
-        <p>If you are interested in a particular field or time and it's not listed right now, check back on this page regularly for changes.
-        <p>
             <h2 hidden>
                 A note about daylight for the fall season: The sun will set at 7:30 on September 23, 7PM on October 13, 6:30 on October 31, and 5:30 on November 6. <p>
                     While we have practice slots that start as late as 7PM, slots starting after 5:30 will lose significant time to darkness. Fields with lights are Jelleff, Wilson and Parkview.
             </h2>
     </H2>
-    <label id="SeasonDates"></label>
+    
     <div id="Wheel">
         <img src="ajax-loader.gif">
     </div>
     <label id="label1">Initializing...</label>
 
     <table ID="fieldlist">
+    </table>
+    <h1>Practice Field Signups that don't match an available field slot</h1>
+    <table ID="errorlist">
     </table>
 
     <div>
@@ -146,10 +145,10 @@ h1, h2, h3
                     var script = document.createElement("script");
                     // This script has a callback function that will run when the script has
                     // finished loading.
-		// this comes from the script named "Rec Practice Availability"
-// URL is https://script.google.com/home/projects/18m6CbkUg6Q6pLkuf3CNQsITAw_7zif9ZwOXTyHv7vcAH2r0RsuYdhTxU/edit
+		// this comes from the script named "Rec Practice Slots Report"
+// https://script.google.com/macros/s/AKfycbxIxV69ZCIxEJurtxh7mgrxluWafc6Yh39W19zUAIgwRZk5In59jIRIGjpmwk_WvF7B/exec
 
-                    var key = "AKfycby6T8kLrthdp0SKTbq_XmvuxYqNI0_PRbWcQE5S4ewlyCRFrFJkzDRLLmZbz6TNd9jxYQ";
+                    var key = "AKfycby3cvNS_zpps6JOFmD-fjKtkkTz1zgj0pVvuw90z9ZdND7pxljEshR0ViyQSjnTqcpE";
                     script.src = "https://script.google.com/macros/s/" + key + "/exec";
 
 
@@ -181,16 +180,24 @@ h1, h2, h3
 
             function onSuccess(v) {
 
+            DisplaySlots(v[0]);
+            DisplayErrors(v[1]);
+
+            }
+
+            function DisplaySlots(v){
+
                 //v is an array with the following fields:
                 //Name
                 //DOW
                 // Time
                 // Address
+                console.log(v);
                 var wheel = document.getElementById("Wheel");
                 wheel.style.display = "none";
                 var label = document.getElementById("label1");
-
-                label.innerHTML = "<h3>Click on a field name to view field on a map.</h3>";
+                label.style.display = "none";
+                
 
                 var table = document.getElementById("fieldlist");
 
@@ -209,60 +216,67 @@ h1, h2, h3
 
 
                 var i;
-                var lastfield = " ";
-                var lastday = " ";
-                var fieldstr = '';
+        
                 var row, cell;
-                SetSeasonDates(v[v.length - 1]);
+        
 
-                for (i = 0; i < v.length - 1; i++) {
+                for (i = 0; i < v.length - 1; i++) 
+                {
 
-                    if (lastfield == v[i][0] && lastday == v[i][1]) {
-                        fieldstr += " " + v[i][2];
-                    }
-                    else {
+                    row = table.insertRow(-1);
+                    var datarow=v[i];
 
-                        if (i > 0) {
+                    var j;
+                    for(j=0; j< datarow.length; j++)
+                    {
+                        
                             cell = row.insertCell(-1);
-                            cell.innerHTML = fieldstr;
+                            cell.innerHTML = datarow[j];
                             cell.class = "slotttime";
-
-                        }
-
-
-                        row = table.insertRow(-1);
-                        cell = row.insertCell(-1);
-
-                        if (lastfield != v[i][0]) {
-                            cell.innerHTML = '<a href="http://maps.google.com/?q=' + v[i][3] + '" target="_blank">' + v[i][0] + '</a>';
-
-                        }
-                        cell = row.insertCell(-1);
-                        cell.innerHTML = v[i][1];
-                        cell.class = "slottime";
-
-                        lastfield = v[i][0];
-                        lastday = v[i][1];
-                        fieldstr = v[i][2];
-
                     }
+
+
 
                 }
-                cell = row.insertCell(-1);
-                cell.innerHTML = fieldstr;
-                cell.class = "slotttime";
-
+                    
 
 
 
 
             }
 
+            function DisplayErrors(v)
+            {
+                  var i;
+        
+                var row, cell;
+                var table = document.getElementById("errorlist");
+
+                for (i = 0; i < v.length - 1; i++) 
+                {
+
+                    row = table.insertRow(-1);
+                    var datarow=v[i];
+
+                    var j;
+                    for(j=0; j< datarow.length; j++)
+                    {
+                        
+                            cell = row.insertCell(-1);
+                            cell.innerHTML = datarow[j];
+                            cell.class = "slotttime";
+                    }
+
+
+
+                }
+            }
+
             function SetSeasonDates(data) {
 
                 var label = document.getElementById("SeasonDates");
 
-                label.innerHTML = "<h3>Season Dates are " + DtoC(data[0]) + " to " + DtoC(data[1]) + "</h3>";
+                
 
 
             }
@@ -287,5 +301,3 @@ h1, h2, h3
 
 
 </div>
-
-

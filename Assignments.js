@@ -12,9 +12,15 @@ function LoadPages()
     LogTime("LoadPages");
     Show("Loading");
 
+
     if (season == undefined)
     {
         season = "";
+    }
+    else
+    {
+        document.getElementById("LoadingSeasonName").innerHTML="Season = "+season;
+
     }
     googleApi.GetAllData(season); // in googleapi.js, calls LoadPageData on return
 }

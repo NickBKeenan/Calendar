@@ -108,7 +108,7 @@ class DataStore
                 {
                     var newData, sheetName;
                     sheetName = data[y][0];
-                    if (sheetName != "NCSL Games")
+                   // if (sheetName != "NCSL Games")
                     {
                         newData = data[y][1];
                         var oldRawData = this.FindRawSection(sheetName);
@@ -1065,10 +1065,11 @@ class RecGameItem
             if (isGameDate)
             {
                 // this date is a game date
+                //fixendtime
                 var starttime = new Date(this.dataItem.StartTime);
                 var endtime=new Date(this.dataItem.EndTime);
-                var starthour = starttime.getHours() + starttime.getMinutes() / 60;
-                var endhour = endtime.getHours() + endtime.getMinutes() / 60;
+                var starthour = GetEasternTimeHours(starttime) + starttime.getMinutes() / 60;
+                var endhour = GetEasternTimeHours(endtime) + endtime.getMinutes() / 60;
                 
                 while (starthour <= endhour - gamelength / 60)
                 {
@@ -1139,14 +1140,15 @@ class ScheduleItem  // represents one entry in a schedule, assignment or permit
         this.m_EndDate = new Date(data.EndDate);
         this.m_EndDate.setHours(0);
         this.m_EndDate.setMinutes(0);
+        // fixendtime
         var stime = new Date(data.StartTime);
         var etime = new Date(data.EndTime);
         if (LDateIsLessThanRDate(this.m_EndDate, this.m_StartDate))
         {
             throw "Start Date is After End Date";
         }
-        this.m_StartTime = stime.getHours() + stime.getMinutes() / 60;
-        this.m_EndTime = etime.getHours() + etime.getMinutes() / 60;
+        this.m_StartTime = GetEasternTimeHours(stime) + stime.getMinutes() / 60;
+        this.m_EndTime = GetEasternTimeHours(etime) + etime.getMinutes() / 60;
         if (this.m_StartTime > this.m_EndTime)
         {
             throw "Start Time is after End Time";
@@ -1625,12 +1627,6 @@ class Assignments extends CalendarRecord
             sheetName = data[x][0];
             line = data[x][1];
 
-            if (sheetName == "NCSL Games")
-            {
-                this.ParseNCSLGames(parentDataStore, line, sheetName);
-            }
-            else
-            {
                 if (sheetName == "Rec Games")
                 {
                     this.ParseRecGames(parentDataStore, line, sheetName)
@@ -1639,10 +1635,10 @@ class Assignments extends CalendarRecord
                 {
                     this.ParseSheet(parentDataStore, line, sheetName);
                 }
-            }
         }
     }
-    ParseNCSLGames(parentDataStore, data, sheetName)
+
+   /* ParseNCSLGames(parentDataStore, data, sheetName)
     {
         this.parentDataStore = parentDataStore;
         if (data.length == 0)
@@ -1716,7 +1712,7 @@ class Assignments extends CalendarRecord
                 this.parentDataStore.LogError("Invalid line", "NCSL Games", x+1);
             }
 }
-    }
+    }*/
     ParseRecGames(parentDataStore, data, sheetName)
     {
         this.parentDataStore = parentDataStore;
@@ -2062,6 +2058,7 @@ function FormTimeFromDayHour(BaseDate, nDOW, nHour)
 //////////////////////////////////////////////////////////////////////
 function AddDaysToDate(BaseDate, nDays)
 {
+    
     var retval = new Date(BaseDate);
 
     // due to daylight savings time, some days have 23 hours and some have 25. So not all times give the next day when 24 hours are added
@@ -2217,8 +2214,9 @@ function toHHMM(intime)
 }
 function toHHMMSS(intime)
 {
+    // fixendtime
     var d = new Date(intime);
-    var hours = d.getHours();
+    var hours = GetEasternTimeHours(d);
     var minutes = d.getMinutes();
     var seconds = d.getSeconds();
     var suffix = "AM";
@@ -2238,8 +2236,10 @@ function toHHMMSS(intime)
     return hours + ':' + minutes + ':' + seconds+" "+suffix;
 }
 function MilitaryTime(intime) {
+
+    //fixendtime 
     var d = new Date(intime);
-    var hours = d.getHours();
+    var hours = GetEasternTimeHours(d);
     var minutes = d.getMinutes();
 
     if (hours < 10) { hours = "0" + hours; }
@@ -2295,3 +2295,16 @@ function BlankArray(len)
     return retval;
 }
 
+function GetEasternTimeHours(intime)
+{
+    // all of our dates are entered in Eastern time. If the user is in another time zone, Gethours() will return wrong info
+    //
+    var testdate=new Date("January 1, 2026 12:00:00 GMT+05:00");
+    var TZoffset=testdate.getTimezoneOffset();
+    
+    //EST is 5 hours, =300 minutes
+    var correctionfactor=(TZoffset-300)/60;
+    console.log(correctionfactor);
+
+    return intime.getHours()+correctionfactor;
+}

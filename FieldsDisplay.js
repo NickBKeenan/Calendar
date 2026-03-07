@@ -2,7 +2,7 @@
 function CreateFieldsSummary(AllAvailability)
 {
     var table = document.getElementById("fieldlist");
-    // console.log(v);
+    
     while (table.rows.length > 0)
     {
         table.deleteRow(0);
@@ -30,8 +30,8 @@ function CreateFieldsSummary(AllAvailability)
     var x;
     for (x = 0; x < AllAvailability.length; x++)
     {
-
         var display = new FieldDisplay(AllAvailability[x]);
+        
         display.CreateDisplayTables(table);
         display.CreateDisplay();
 
@@ -45,7 +45,7 @@ function Expand(tableID, cDOW)
 
     Hide("fieldlist");
     Show(tableID);
-    console.log(tableID, cDOW);
+
 
     var x;
     for (x = 0; x < 7; x++)
@@ -80,6 +80,7 @@ class FieldDisplay
     constructor(availability)
     {
         this.availability = availability;
+
     }
     CreateFieldID()
     {

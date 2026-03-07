@@ -1136,10 +1136,8 @@ class ScheduleItem  // represents one entry in a schedule, assignment or permit
     constructor(data, except)
     {
 
-        this.m_StartDate = new Date(data.StartDate);
-        this.m_EndDate = new Date(data.EndDate);
-        this.m_EndDate.setHours(0);
-        this.m_EndDate.setMinutes(0);
+        this.m_StartDate = GetEasternTimeDate(data.StartDate);
+        this.m_EndDate = GetEasternTimeDate(data.EndDate);
         // fixendtime
         var stime = new Date(data.StartTime);
         var etime = new Date(data.EndTime);
@@ -2304,7 +2302,25 @@ function GetEasternTimeHours(intime)
     
     //EST is 5 hours, =300 minutes
     var correctionfactor=(TZoffset-300)/60;
-    console.log(correctionfactor);
+    //console.log(correctionfactor);
 
     return intime.getHours()+correctionfactor;
+}
+
+function GetEasternTimeDate(indate)
+{
+    var retval=new Date(indate);
+    var correctionfactor;
+    correctionfactor=retval.getHours()- GetEasternTimeHours(retval);
+
+    if(correctionfactor!= 0)
+    {
+        retval.setTime(retval.getTime()- correctionfactor*3600*1000);
+        
+    }
+    retval.setHours(0);
+    retval.setMinutes(0);
+
+    return retval;
+
 }

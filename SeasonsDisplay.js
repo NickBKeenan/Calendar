@@ -37,9 +37,9 @@ function CreateSeasonSummary()
             }
             cell.innerHTML += seasonkey;;
             cell = row.insertCell(-1);
-            cell.innerHTML = DtoC(value.Begin_Date);;
+            cell.innerHTML = DtoC(GetEasternTimeDate(value.Begin_Date));;
             cell = row.insertCell(-1);
-            cell.innerHTML = DtoC(value.End_Date);;
+            cell.innerHTML = DtoC(GetEasternTimeDate(value.End_Date));;
             cell = row.insertCell(-1);
             if (currentkey != seasonkey)
             {

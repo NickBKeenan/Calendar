@@ -957,12 +957,12 @@ class Season extends Map
     }
     BeginDate()
     {
-        return new Date(this.CurrentRec().Begin_Date);
+        return GetEasternTimeDate(this.CurrentRec().Begin_Date);
 
     }
     EndDate()
     {
-        return new Date(this.CurrentRec().End_Date);
+        return GetEasternTimeDate(this.CurrentRec().End_Date);
 
     }
 }
@@ -1749,7 +1749,7 @@ class GameDays extends Array
         var x;
         for (x = 1; x < data.length; x++)
         {
-            this.push(new Date(data[x]));
+            this.push(GetEasternTimeDate(data[x]));
         }
 
         this.NonGameDates = new Map();

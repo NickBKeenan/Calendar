@@ -27,7 +27,7 @@ function PopulatePublishTab(divisionlist)
         cell = row.insertCell(-1);
         cell.innerHTML = '<a href="https://docs.google.com/spreadsheet/ccc?key=' + divisionlist[x].Spreadsheet_Key+'" target="_blank">Open Spreadsheet</a>';
         cell = row.insertCell(-1);
-        cell.innerHTML = '<a href="Scheduler.html?key=' + divisionlist[x].Spreadsheet_Key + '" target="_blank">Launch Scheduler App</a>';
+        cell.innerHTML = '<a href="scheduler.html?key=' + divisionlist[x].Spreadsheet_Key + '" target="_blank">Launch Scheduler App</a>';
 
     }
 }
